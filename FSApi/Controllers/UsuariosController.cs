@@ -1,24 +1,21 @@
-﻿using FSApi.Models;
-using FSApi.Repositories;
-using Microsoft.AspNetCore.Authorization;
+﻿using FSApi.Interfaces;
+using FSApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FSApi.Controllers
 {
-    [Produces("application/json")]  
-
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
-
-    [Authorize(Roles = "1")]
-    public class LivroController : ControllerBase
+    public class UsuariosController : ControllerBase
     {
-        private readonly LivroRepository _livroRepository;
 
-        public LivroController(LivroRepository livroRepository)
+        private readonly IUsuarioRepository _iUsuarioRepository;
+
+        public UsuariosController(IUsuarioRepository usuarioRepository)
         {
-            _livroRepository = livroRepository;
+            _iUsuarioRepository = usuarioRepository;
         }
 
         [HttpGet]
@@ -26,13 +23,12 @@ namespace FSApi.Controllers
         {
             try
             {
-                return Ok(_livroRepository.Listar());
+                return Ok(_iUsuarioRepository.Listar());
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw new Exception(e.Message);
+                throw;
             }
-
         }
 
 
@@ -41,13 +37,12 @@ namespace FSApi.Controllers
         {
             try
             {
-                Livro livro = _livroRepository.BuscarPorId(id);
+                Usuario usuarioEncontrado = _iUsuarioRepository.BuscarPorId(id);
 
-                if (livro == null)
-                {
+                if (usuarioEncontrado == null)
                     return NotFound();
-                }
-                return Ok(livro);
+
+                return Ok(usuarioEncontrado);
             }
             catch (Exception)
             {
@@ -55,32 +50,35 @@ namespace FSApi.Controllers
             }
         }
 
+
         [HttpPost]
-        public IActionResult Cadastrar(Livro livro)
+        public IActionResult Cadastrar(Usuario usuario)
         {
             try
             {
-                _livroRepository.Cadastrar(livro);
+                // usuario.Tipo = "0";
+                _iUsuarioRepository.Cadastrar(usuario);
 
                 return StatusCode(201);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Atualizar(int id, Livro livro)
+        public IActionResult Alterar(int id, Usuario usuario)
         {
             try
             {
-                _livroRepository.Atualizar(id, livro);
-                return StatusCode(204);
-                
+                _iUsuarioRepository.Atualizar(id, usuario);
+
+                return Ok("Usuário Alterado");
             }
             catch (Exception)
             {
+
                 throw;
             }
         }
@@ -90,16 +88,16 @@ namespace FSApi.Controllers
         {
             try
             {
-                _livroRepository.Deletar(id);
+                _iUsuarioRepository.Deletar(id);
 
-                return StatusCode(204);
+                return Ok("Usuario Deletado");
             }
             catch (Exception)
             {
+
                 throw;
             }
         }
-
 
     }
 }
